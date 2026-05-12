@@ -323,6 +323,11 @@ app.get(
   }),
 )
 
+// Fallback for Client-Side Routing (SPA)
+app.get('*', async (c) => {
+  return c.html(await Bun.file('./public/index.html').text())
+})
+
 // ─── Bun Server Entry ─────────────────────────────────────────────────────────
 
 const PORT = parseInt(process.env.PORT ?? '3000')

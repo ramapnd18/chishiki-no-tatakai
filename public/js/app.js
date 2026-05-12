@@ -69,11 +69,45 @@ function setWsStatus(connected) {
   txt.textContent = connected ? 'Terhubung' : 'Terputus'
 }
 
-// ─── Screen Manager ───────────────────────────────────────────────────────────
-function showScreen(id) {
+// ─── Routing & Screen Manager ───────────────────────────────────────────────────
+const routeMap = {
+  '/': 'screen-home',
+  '/login': 'screen-login',
+  '/register': 'screen-register',
+  '/profile': 'screen-profile',
+  '/host': 'screen-host-setup',
+  '/join': 'screen-player-join',
+  '/lobby': 'screen-player-lobby',
+  '/game': 'screen-game',
+  '/gameover': 'screen-gameover'
+}
+const screenMap = Object.fromEntries(Object.entries(routeMap).map(([k, v]) => [v, k]))
+
+function showScreen(id, pushState = true) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'))
-  document.getElementById(id).classList.add('active')
+  const el = document.getElementById(id)
+  if (el) el.classList.add('active')
   window.scrollTo(0, 0)
+  
+  if (pushState && screenMap[id]) {
+    const url = screenMap[id]
+    if (window.location.pathname !== url) {
+      history.pushState({ screen: id }, '', url)
+    }
+  }
+}
+
+window.addEventListener('popstate', (e) => {
+  if (e.state && e.state.screen) {
+    showScreen(e.state.screen, false)
+  } else {
+    handleRoute(window.location.pathname)
+  }
+})
+
+function handleRoute(path) {
+  const id = routeMap[path] || 'screen-home'
+  showScreen(id, false)
 }
 
 function currentScreen() {
@@ -709,3 +743,10 @@ if (token && username && userId) {
 
 updateAuthUI()
 connectWS()
+
+// Handle initial route
+// We need to wait a tiny bit to ensure all components are injected if they load asynchronously,
+// but actually loadComponents() finishes BEFORE this script is appended, so it's safe to run immediately.
+setTimeout(() => {
+  handleRoute(window.location.pathname)
+}, 50)
