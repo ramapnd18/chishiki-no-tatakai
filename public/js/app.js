@@ -17,6 +17,10 @@ const state = {
 
 // ─── WebSocket ────────────────────────────────────────────────────────────────
 function connectWS() {
+  if (state.ws) {
+    state.ws.onclose = null;
+    state.ws.close();
+  }
   const proto = location.protocol === 'https:' ? 'wss' : 'ws'
   const ws = new WebSocket(`${proto}://${location.host}/ws`)
   state.ws = ws
@@ -271,12 +275,13 @@ function sendSkipQuestion() {
 }
 
 // ─── Game: Chat ───────────────────────────────────────────────────────────────
-function sendChatMessage() {
-  const input = document.getElementById('chat-input')
-  const text = input.value.trim()
+function sendChatMessage(formEl) {
+  const input = formEl ? formEl.querySelector('.chat-input') : document.getElementById('chat-input')
+  const text = input?.value.trim()
   if (!text) return
   sendWS({ type: 'chat', text })
-  input.value = ''
+  if (input) input.value = ''
+  document.querySelectorAll('.chat-input').forEach(el => el.value = '')
 }
 
 // ─── Server Message Handler ────────────────────────────────────────────────────
@@ -376,8 +381,8 @@ function handleServerMessage(msg) {
     }
 
     case 'chat': {
-      const container = document.getElementById('chat-messages')
-      if (container) {
+      const containers = document.querySelectorAll('.chat-messages-container')
+      containers.forEach(container => {
         const isMine = msg.playerId === state.playerId
         const bubble = document.createElement('div')
         bubble.style.cssText = `
@@ -395,7 +400,7 @@ function handleServerMessage(msg) {
         bubble.innerHTML = `${nameEl}<div>${escHtml(msg.text)}</div>`
         container.appendChild(bubble)
         container.scrollTop = container.scrollHeight
-      }
+      })
       break
     }
 

@@ -36,7 +36,7 @@
   </div>
 
   <!-- Sidebar Leaderboard & Chat -->
-  <div class="game-sidebar" style="display:flex; flex-direction:column; gap:1.5rem;">
+  <div class="game-sidebar">
     <div>
       <div class="sidebar-title">🏆 Papan Skor</div>
       <div class="lb-list" id="sidebar-lb-list">
@@ -45,10 +45,10 @@
     </div>
     <div style="flex:1; display:flex; flex-direction:column; min-height:200px;">
       <div class="sidebar-title">💬 Obrolan</div>
-      <div id="chat-messages" style="flex:1; overflow-y:auto; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:.75rem; margin-bottom:.5rem; display:flex; flex-direction:column; gap:.5rem;">
+      <div class="chat-messages-container" style="flex:1; overflow-y:auto; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:.75rem; margin-bottom:.5rem; display:flex; flex-direction:column; gap:.5rem;">
       </div>
-      <form id="chat-form" style="display:flex; gap:.5rem;" onsubmit="event.preventDefault(); sendChatMessage()">
-        <input type="text" id="chat-input" class="input" style="padding:.5rem; font-size:.85rem;" placeholder="Ketik pesan…" autocomplete="off" />
+      <form id="chat-form" style="display:flex; gap:.5rem;" onsubmit="event.preventDefault(); sendChatMessage(this)">
+        <input type="text" class="chat-input input" style="padding:.5rem; font-size:.85rem;" placeholder="Ketik pesan…" autocomplete="off" />
         <button type="submit" class="btn btn-red" style="padding:.5rem 1rem; font-size:.85rem;">Kirim</button>
       </form>
     </div>
