@@ -99,6 +99,8 @@ app.get('/api/auth/verify', async (c) => {
       id: user?.id,
       username: user?.username,
       email: user?.email,
+      totalGames: user?.totalGamesPlayed ?? 0,
+      totalScore: user?.totalScore ?? 0,
     },
   })
 })
