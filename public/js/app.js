@@ -95,6 +95,11 @@ function showScreen(id, pushState = true) {
       history.pushState({ screen: id }, '', url)
     }
   }
+
+  // Load profile data if navigating to profile
+  if (id === 'screen-profile') {
+    loadProfile()
+  }
 }
 
 window.addEventListener('popstate', (e) => {
@@ -242,6 +247,32 @@ function updateAuthUI() {
     if (gameSection) gameSection.style.display = 'none'
     if (userInfo) userInfo.style.display = 'none'
   }
+}
+
+// ─── Profile ──────────────────────────────────────────────────────────────────
+async function loadProfile() {
+  const token = localStorage.getItem('token')
+  if (!token) return
+
+  try {
+    const res = await fetch('/api/auth/verify', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const data = await res.json()
+    
+    if (data.valid && data.user) {
+      document.getElementById('profile-username').textContent = data.user.username
+      document.getElementById('profile-email').textContent = data.user.email || '-'
+      document.getElementById('profile-games').textContent = data.user.totalGames || 0
+      document.getElementById('profile-score').textContent = data.user.totalScore || 0
+    }
+  } catch (err) {
+    console.error('Failed to load profile:', err)
+  }
+}
+
+function goToHomeFromProfile() {
+  handleRoute('/')
 }
 
 // ─── Home ─────────────────────────────────────────────────────────────────────
