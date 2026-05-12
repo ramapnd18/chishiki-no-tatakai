@@ -194,6 +194,41 @@ app.get(
           return
         }
 
+        // ── reconnect ───────────────────────────────────────────────────────
+        if (msg.type === 'reconnect') {
+          const roomId = msg.roomId.trim().toUpperCase()
+          const playerId = msg.playerId.trim()
+          const room = getRoom(roomId)
+
+          if (!room) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Sesi permainan sudah berakhir.' }))
+            return
+          }
+
+          const { player, error } = require('./gameManager').reconnectPlayer(roomId, playerId, ws)
+          if (error || !player) {
+            ws.send(JSON.stringify({ type: 'error', message: error || 'Gagal menyambung ulang.' }))
+            return
+          }
+
+          connectedRoomId = roomId
+          connectedPlayerId = player.id
+          console.log(`[WS] ${player.name} reconnected to room ${roomId}`)
+
+          // Send current state to reconnected player
+          sendTo(player, {
+            type: 'reconnect_success',
+            roomId,
+            player: playerPublic(player),
+            gameState: room.game,
+            leaderboard: getLeaderboard(room)
+          })
+
+          const players = [...room.players.values()].map(playerPublic)
+          broadcast(room, { type: 'players_update', players })
+          return
+        }
+
         // All subsequent messages require an established connection
         if (!connectedRoomId || !connectedPlayerId) {
           ws.send(JSON.stringify({ type: 'error', message: 'Kamu belum bergabung ke room.' }))
@@ -261,24 +296,22 @@ app.get(
         const wasHost = player?.isHost ?? false
         const playerName = player?.name ?? 'Pemain'
 
-        removePlayer(connectedRoomId, connectedPlayerId)
+        require('./gameManager').removePlayer(connectedRoomId, connectedPlayerId)
         console.log(`[WS] ${playerName} disconnected from room ${connectedRoomId}`)
 
-        if (wasHost) {
-          broadcast(room, { type: 'host_disconnected' })
-          // Clean up the room entirely when host leaves
-          room.players.clear()
-        } else {
-          // Notify others
-          if (room.players.size > 0) {
+        // Notify others
+        if (room.players.size > 0) {
+          if (wasHost) {
+            broadcast(room, { type: 'host_disconnected' })
+          } else {
             broadcast(room, { type: 'player_left', playerName })
-            const players = [...room.players.values()].map(playerPublic)
-            broadcast(room, { type: 'players_update', players })
-            broadcast(room, { type: 'leaderboard', players: getLeaderboard(room) })
           }
+          const players = [...room.players.values()].map(playerPublic)
+          broadcast(room, { type: 'players_update', players })
+          broadcast(room, { type: 'leaderboard', players: getLeaderboard(room) })
         }
 
-        cleanupEmptyRoom(connectedRoomId)
+        require('./gameManager').cleanupEmptyRoom(connectedRoomId)
         connectedRoomId = null
         connectedPlayerId = null
       },

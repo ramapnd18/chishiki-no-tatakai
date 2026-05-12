@@ -9,6 +9,7 @@ const AUTO_ADVANCE_DELAY_MS = 1500; // time before auto-advancing after correct 
 // ─── Singleton Rooms Store ────────────────────────────────────────────────────
 
 const rooms = new Map<string, Room>();
+const deletionTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 // ─── ID Helpers ───────────────────────────────────────────────────────────────
 
@@ -147,12 +148,53 @@ export function removePlayer(roomId: string, playerId: string): boolean {
 
 export function cleanupEmptyRoom(roomId: string) {
   const room = rooms.get(roomId);
-  if (room) {
-    const allOffline = [...room.players.values()].every(p => p.status === 'offline');
-    if (room.players.size === 0 || allOffline) {
-      rooms.delete(roomId);
+  if (!room) return;
+
+  const allOffline = [...room.players.values()].every(p => p.status === 'offline');
+  if (room.players.size === 0 || allOffline) {
+    if (!deletionTimers.has(roomId)) {
+      const timer = setTimeout(() => {
+        const currentRoom = rooms.get(roomId);
+        if (currentRoom) {
+          const stillAllOffline = [...currentRoom.players.values()].every(p => p.status === 'offline');
+          if (currentRoom.players.size === 0 || stillAllOffline) {
+            rooms.delete(roomId);
+          }
+        }
+        deletionTimers.delete(roomId);
+      }, 15000); // 15 seconds grace period
+      deletionTimers.set(roomId, timer);
+    }
+  } else {
+    const timer = deletionTimers.get(roomId);
+    if (timer) {
+      clearTimeout(timer);
+      deletionTimers.delete(roomId);
     }
   }
+}
+
+export function reconnectPlayer(roomId: string, playerId: string, ws: Player["ws"]): { player?: Player, error?: string } {
+  const room = rooms.get(roomId);
+  if (!room) return { error: "Room tidak ditemukan atau sudah kadaluarsa." };
+  
+  const player = room.players.get(playerId);
+  if (!player) return { error: "Pemain tidak ditemukan." };
+
+  player.ws = ws;
+  player.status = 'online';
+
+  broadcast(room, {
+    type: 'presence',
+    playerId: player.id,
+    playerName: player.name,
+    status: 'online',
+  }, player.id);
+
+  // Clear deletion timer if this player reconnects and makes room active
+  cleanupEmptyRoom(roomId);
+
+  return { player };
 }
 
 // ─── Game Control ─────────────────────────────────────────────────────────────

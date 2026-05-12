@@ -25,7 +25,16 @@ function connectWS() {
   const ws = new WebSocket(`${proto}://${location.host}/ws`)
   state.ws = ws
 
-  ws.onopen = () => setWsStatus(true)
+  ws.onopen = () => {
+    setWsStatus(true)
+    
+    // Auto-reconnect if session data exists
+    const storedRoomId = sessionStorage.getItem('roomId')
+    const storedPlayerId = sessionStorage.getItem('playerId')
+    if (storedRoomId && storedPlayerId) {
+      sendWS({ type: 'reconnect', roomId: storedRoomId, playerId: storedPlayerId })
+    }
+  }
 
   ws.onclose = () => {
     setWsStatus(false)
@@ -292,16 +301,71 @@ function handleServerMessage(msg) {
       state.playerId = msg.playerId
       state.isHost   = msg.isHost
 
+      // Persist to session
+      sessionStorage.setItem('roomId', state.roomId)
+      sessionStorage.setItem('playerId', state.playerId)
+      sessionStorage.setItem('isHost', state.isHost)
+      sessionStorage.setItem('playerName', state.playerName)
+
       if (msg.isHost) {
         // Already on host-setup screen
       } else {
         // Transition to player lobby
         document.getElementById('player-lobby-room').textContent = 'Room: ' + state.roomId
         const btn = document.getElementById('btn-join')
-        btn.disabled = false
-        btn.innerHTML = '⚔️ Bergabung'
+        if (btn) {
+          btn.disabled = false
+          btn.innerHTML = '⚔️ Bergabung'
+        }
         showScreen('screen-player-lobby')
       }
+      break
+    }
+
+    case 'reconnect_success': {
+      state.roomId = msg.roomId
+      state.playerId = msg.player.id
+      state.isHost = msg.player.isHost
+      state.playerName = msg.player.name
+      
+      // Sync UI based on gameState
+      const gameState = msg.gameState
+      renderLeaderboard(msg.leaderboard)
+      
+      if (gameState.status === 'waiting') {
+        if (state.isHost) {
+          document.getElementById('host-room-code').textContent = state.roomId
+          showScreen('screen-host-setup')
+        } else {
+          document.getElementById('player-lobby-room').textContent = 'Room: ' + state.roomId
+          showScreen('screen-player-lobby')
+        }
+      } else if (gameState.status === 'playing') {
+        initGameScreen()
+        showScreen('screen-game')
+        
+        // Restore current question if not done
+        if (!gameState.questionDone && gameState.currentIndex < gameState.questions.length) {
+          const q = gameState.questions[gameState.currentIndex]
+          renderQuestion(q, gameState.currentIndex + 1, gameState.questions.length)
+          
+          // Disable answers if we already answered
+          if (msg.player.answeredCurrentQuestion) {
+            state.myAnswerIndex = 0 // arbitrary just to block
+            document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true)
+            document.getElementById('answer-status').innerHTML = '<span class="text-muted">Menunggu pemain lain…</span>'
+          }
+        } else {
+          // Question is done, just show waiting
+          document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true)
+          document.getElementById('question-text').textContent = "Bersiap untuk soal selanjutnya..."
+        }
+      } else if (gameState.status === 'finished') {
+        renderGameOver(msg.leaderboard)
+        showScreen('screen-gameover')
+      }
+      
+      showToast('✅ Berhasil menyambung ulang!')
       break
     }
 
@@ -578,12 +642,20 @@ function playAgain() {
 // ─── Leave / Home ─────────────────────────────────────────────────────────────
 function leaveAndGoHome() {
   if (state.ws) { state.ws.close(); state.ws = null }
+  sessionStorage.removeItem('roomId')
+  sessionStorage.removeItem('playerId')
+  sessionStorage.removeItem('isHost')
+  sessionStorage.removeItem('playerName')
   state.roomId = null
   state.playerId = null
   state.isHost = false
   state.playerName = ''
-  document.getElementById('player-name-input').value = ''
-  document.getElementById('player-room-code-input').value = ''
+  
+  const nameInput = document.getElementById('player-name-input')
+  const codeInput = document.getElementById('player-room-code-input')
+  if (nameInput) nameInput.value = ''
+  if (codeInput) codeInput.value = ''
+  
   showScreen('screen-home')
   connectWS()
 }

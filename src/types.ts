@@ -75,6 +75,7 @@ export interface Room {
 // Client → Server
 export type ClientMessage =
   | { type: 'join'; roomId: string; playerName: string; isHost: boolean }
+  | { type: 'reconnect'; roomId: string; playerId: string }
   | { type: 'start_game'; roomId: string }
   | { type: 'answer'; roomId: string; answerIndex: number }
   | { type: 'skip_question'; roomId: string }
@@ -83,6 +84,7 @@ export type ClientMessage =
 // Server → Client
 export type ServerMessage =
   | { type: 'room_joined'; roomId: string; playerId: string; isHost: boolean }
+  | { type: 'reconnect_success'; roomId: string; player: PlayerPublic; gameState: GameState; leaderboard: PlayerPublic[] }
   | { type: 'players_update'; players: PlayerPublic[] }
   | { type: 'game_started' }
   | { type: 'question'; data: QuestionPayload; index: number; total: number }
