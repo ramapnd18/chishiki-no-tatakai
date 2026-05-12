@@ -2,7 +2,7 @@ import { prisma } from './db'
 import type { Room, Player, PlayerPublic, GameState } from "./types";
 import { pickRandomQuestions } from "./questions";
 
-const TOTAL_QUESTIONS = 30;
+const TOTAL_QUESTIONS = 10;
 const POINTS_CORRECT = 10;
 const POINTS_WRONG = -5;
 const AUTO_ADVANCE_DELAY_MS = 1500; // time before auto-advancing after correct answer
