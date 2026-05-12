@@ -1,3 +1,4 @@
+import { prisma } from './db'
 import type { Room, Player, PlayerPublic, GameState } from "./types";
 import { pickRandomQuestions } from "./questions";
 
@@ -97,6 +98,7 @@ export function joinRoom(
   playerName: string,
   isHost: boolean,
   ws: Player["ws"],
+  userId?: string,
 ): { player: Player; error?: never } | { player?: never; error: string } {
   const room = rooms.get(roomId);
   if (!room) return { error: "Room tidak ditemukan." };
@@ -116,6 +118,7 @@ export function joinRoom(
   const player: Player = {
     id: generateId(8),
     name: trimmedName,
+    userId,
     score: 0,
     isHost,
     ws,
@@ -394,7 +397,48 @@ export function skipQuestion(
   return {};
 }
 
+async function saveGameHistory(room: Room) {
+  try {
+    // Create Game record
+    const game = await prisma.game.create({
+      data: {
+        roomId: room.id,
+        status: 'finished',
+        finishedAt: new Date(),
+      }
+    })
+
+    // Create GameHistory for each non-host authenticated player
+    const players = [...room.players.values()].filter(p => !p.isHost && p.userId)
+    for (const player of players) {
+      await prisma.gameHistory.create({
+        data: {
+          gameId: game.id,
+          userId: player.userId!,
+          score: player.score,
+          correctAnswers: player.correctAnswers,
+          wrongAnswers: player.wrongAnswers,
+        }
+      })
+
+      // Update user stats
+      await prisma.user.update({
+        where: { id: player.userId! },
+        data: {
+          totalGamesPlayed: { increment: 1 },
+          totalScore: { increment: player.score > 0 ? player.score : 0 },
+        }
+      })
+    }
+
+    console.log(`[DB] Game history saved for room ${room.id} (${players.length} players)`)
+  } catch (err) {
+    console.error('[DB] Failed to save game history:', err)
+  }
+}
+
 function endGame(room: Room) {
   room.game.status = "finished";
   broadcast(room, { type: "game_over", players: getLeaderboard(room) });
+  saveGameHistory(room)
 }

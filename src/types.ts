@@ -74,7 +74,7 @@ export interface Room {
 
 // Client → Server
 export type ClientMessage =
-  | { type: 'join'; roomId: string; playerName: string; isHost: boolean }
+  | { type: 'join'; roomId: string; playerName: string; isHost: boolean; token?: string }
   | { type: 'reconnect'; roomId: string; playerId: string }
   | { type: 'start_game'; roomId: string }
   | { type: 'answer'; roomId: string; answerIndex: number }

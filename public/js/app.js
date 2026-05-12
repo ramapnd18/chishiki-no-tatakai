@@ -294,7 +294,7 @@ async function goToHostSetup() {
     showScreen('screen-host-setup')
 
     // Join the room as host via WS
-    sendWS({ type: 'join', roomId: data.roomId, playerName: 'Host', isHost: true })
+    sendWS({ type: 'join', roomId: data.roomId, playerName: 'Host', isHost: true, token: localStorage.getItem('token') ?? undefined })
   } catch (err) {
     showToast('❌ Gagal membuat room: ' + err.message)
   }
@@ -322,7 +322,7 @@ function joinRoom() {
   btn.disabled = true
   btn.innerHTML = '<span class="spinner"></span> Bergabung…'
 
-  sendWS({ type: 'join', roomId: code, playerName: name, isHost: false })
+  sendWS({ type: 'join', roomId: code, playerName: name, isHost: false, token: localStorage.getItem('token') ?? undefined })
 }
 
 // ─── Host: Start Game ─────────────────────────────────────────────────────────

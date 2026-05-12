@@ -152,6 +152,7 @@ app.get(
       },
 
       onMessage(event, ws) {
+        ;(async () => {
         let msg: ClientMessage
         try {
           msg = JSON.parse(event.data as string) as ClientMessage
@@ -160,7 +161,7 @@ app.get(
           return
         }
 
-        // ── join ────────────────────────────────────────────────────────────
+        // ── join ───────────────────────────────────────────────────────
         if (msg.type === 'join') {
           const roomId = msg.roomId.trim().toUpperCase()
           const room = getRoom(roomId)
@@ -170,7 +171,16 @@ app.get(
             return
           }
 
-          const result = joinRoom(roomId, msg.playerName, msg.isHost, ws)
+          // Try to get userId from token (optional)
+          let userId: string | undefined
+          if (msg.token) {
+            const verified = await verifySession(msg.token)
+            if (verified.valid && verified.session) {
+              userId = verified.session.userId
+            }
+          }
+
+          const result = joinRoom(roomId, msg.playerName, msg.isHost, ws, userId)
           if (result.error) {
             ws.send(JSON.stringify({ type: 'error', message: result.error }))
             return
@@ -180,7 +190,7 @@ app.get(
           connectedRoomId = roomId
           connectedPlayerId = player.id
 
-          console.log(`[WS] ${player.name} joined room ${roomId} (host=${player.isHost})`)
+          console.log(`[WS] ${player.name} joined room ${roomId} (host=${player.isHost}, userId=${userId ?? 'guest'})`)
 
           // Confirm to the new player
           sendTo(player, {
@@ -276,16 +286,11 @@ app.get(
               text: msg.text,
               timestamp: new Date().toISOString(),
             }
-            broadcast(room, chatMsg) // Send to everyone including sender?
-            // Actually broadcast excludes sender by default if we pass ID, but here we want everyone. 
-            // Wait, broadcast in gameManager: export function broadcast(room: Room, message: object, excludeId?: string)
             broadcast(room, chatMsg)
-            // Need to also send to self because broadcast might exclude?
-            // wait, broadcast definition: for (const [id, p] of room.players) { if (id !== excludeId) ... }
-            // So if excludeId is undefined, it sends to everyone including self.
           }
           return
         }
+        })()
       },
 
       onClose(_event, _ws) {
