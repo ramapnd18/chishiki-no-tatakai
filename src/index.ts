@@ -173,10 +173,16 @@ app.get(
 
           // Try to get userId from token (optional)
           let userId: string | undefined
+          console.log(`[WS] join msg.token present: ${!!msg.token}`)
           if (msg.token) {
-            const verified = await verifySession(msg.token)
-            if (verified.valid && verified.session) {
-              userId = verified.session.userId
+            try {
+              const verified = await verifySession(msg.token)
+              console.log(`[WS] verifySession result: valid=${verified.valid}, userId=${(verified as any).session?.userId ?? 'none'}`)
+              if (verified.valid && verified.session) {
+                userId = verified.session.userId
+              }
+            } catch (e) {
+              console.error('[WS] verifySession error:', e)
             }
           }
 

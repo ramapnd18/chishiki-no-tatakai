@@ -399,6 +399,13 @@ export function skipQuestion(
 
 async function saveGameHistory(room: Room) {
   try {
+    // Debug: log all players and their userId
+    const allPlayers = [...room.players.values()]
+    console.log(`[DB] saveGameHistory - room ${room.id}:`)
+    for (const p of allPlayers) {
+      console.log(`  player: ${p.name} | isHost=${p.isHost} | userId=${p.userId ?? 'UNDEFINED'}`)
+    }
+
     // Create Game record
     const game = await prisma.game.create({
       data: {
@@ -409,7 +416,9 @@ async function saveGameHistory(room: Room) {
     })
 
     // Create GameHistory for each non-host authenticated player
-    const players = [...room.players.values()].filter(p => !p.isHost && p.userId)
+    const players = allPlayers.filter(p => !p.isHost && p.userId)
+    console.log(`[DB] Eligible for GameHistory: ${players.length}`)
+
     for (const player of players) {
       await prisma.gameHistory.create({
         data: {
@@ -421,7 +430,6 @@ async function saveGameHistory(room: Room) {
         }
       })
 
-      // Update user stats
       await prisma.user.update({
         where: { id: player.userId! },
         data: {
@@ -429,9 +437,10 @@ async function saveGameHistory(room: Room) {
           totalScore: { increment: player.score > 0 ? player.score : 0 },
         }
       })
+      console.log(`[DB] Saved: ${player.name} score=${player.score}`)
     }
 
-    console.log(`[DB] Game history saved for room ${room.id} (${players.length} players)`)
+    console.log(`[DB] Done saving game history (${players.length} players)`)
   } catch (err) {
     console.error('[DB] Failed to save game history:', err)
   }
