@@ -1,0 +1,38 @@
+<div id="screen-login" class="screen">
+  <div style="display:flex; align-items:center; justify-content:center; min-height:100vh; padding:2rem 1.5rem">
+    <div class="join-form anim-fade">
+      <div class="text-center" style="margin-bottom:2rem">
+        <div class="title-kanji" style="font-size:2.5rem">ログイン</div>
+        <div class="title-sub" style="margin-top:.3rem">Masuk ke Akun</div>
+      </div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="login-username" class="input"
+               placeholder="Masukkan username…" maxlength="50"
+               onkeydown="if(event.key==='Enter')handleLogin()" />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" class="input"
+               placeholder="Masukkan password…"
+               onkeydown="if(event.key==='Enter')handleLogin()" />
+      </div>
+
+      <button class="btn btn-red btn-full btn-lg mt-2" id="btn-login" onclick="handleLogin()">
+        🔓 Masuk
+      </button>
+      <button class="btn btn-ghost btn-full mt-1" onclick="showScreen('screen-register')">
+        ✏️ Daftar Akun Baru
+      </button>
+      <button class="btn btn-ghost btn-full mt-1" onclick="showScreen('screen-home')">
+        ← Kembali
+      </button>
+
+      <p class="text-muted text-center mt-2" style="font-size:.8rem">
+        <span id="login-error" style="color:var(--wrong)"></span>
+      </p>
+    </div>
+  </div>
+</div>

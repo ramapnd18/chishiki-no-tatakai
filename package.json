@@ -1,0 +1,17 @@
+{
+  "name": "chishiki-no-tatakai",
+  "version": "1.0.0",
+  "description": "Real-time Quiz Battle Web App - 知識の戦い",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "hono": "^4.12.16"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^6.19.3"
+  }
+}

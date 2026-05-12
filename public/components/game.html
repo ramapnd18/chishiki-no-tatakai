@@ -1,0 +1,56 @@
+<div id="screen-game" class="screen">
+
+  <!-- Main area -->
+  <div class="game-main">
+
+    <!-- Top bar -->
+    <div class="flex items-center justify-between" style="flex-wrap:wrap; gap:.75rem">
+      <div class="question-progress" style="flex:1; min-width:180px">
+        <div class="progress-track">
+          <div class="progress-fill" id="q-progress-fill" style="width:0%"></div>
+        </div>
+        <span class="progress-label" id="q-progress-label">0 / 15</span>
+      </div>
+      <div id="q-category" class="badge badge-red">—</div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-card anim-fade" id="question-card">
+      <p class="text-muted" style="font-size:.78rem; margin-bottom:.75rem" id="q-index-label">Soal 1</p>
+      <p class="question-text" id="question-text">Memuat soal…</p>
+    </div>
+
+    <!-- Answers -->
+    <div class="answers-grid" id="answers-grid"></div>
+
+    <!-- Answer status -->
+    <div class="answer-status" id="answer-status"></div>
+
+    <!-- Host controls -->
+    <div class="host-controls" id="host-game-controls" style="display:none">
+      <button class="btn btn-ghost" onclick="sendSkipQuestion()" style="font-size:.82rem">
+        ⏭ Skip Soal
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Sidebar Leaderboard & Chat -->
+  <div class="game-sidebar" style="display:flex; flex-direction:column; gap:1.5rem;">
+    <div>
+      <div class="sidebar-title">🏆 Papan Skor</div>
+      <div class="lb-list" id="sidebar-lb-list">
+        <p class="text-muted" style="font-size:.8rem">Belum ada data…</p>
+      </div>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; min-height:200px;">
+      <div class="sidebar-title">💬 Obrolan</div>
+      <div id="chat-messages" style="flex:1; overflow-y:auto; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:.75rem; margin-bottom:.5rem; display:flex; flex-direction:column; gap:.5rem;">
+      </div>
+      <form id="chat-form" style="display:flex; gap:.5rem;" onsubmit="event.preventDefault(); sendChatMessage()">
+        <input type="text" id="chat-input" class="input" style="padding:.5rem; font-size:.85rem;" placeholder="Ketik pesan…" autocomplete="off" />
+        <button type="submit" class="btn btn-red" style="padding:.5rem 1rem; font-size:.85rem;">Kirim</button>
+      </form>
+    </div>
+  </div>
+</div>

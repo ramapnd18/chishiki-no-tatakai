@@ -1,0 +1,71 @@
+<div id="screen-home" class="screen active">
+  <div class="home-hero anim-fade">
+    <div class="kamon">
+      <!-- Simplified mon (family crest) SVG -->
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" stroke="#c8152a" stroke-width="1.5" opacity=".6"/>
+        <circle cx="50" cy="50" r="38" stroke="#c8152a" stroke-width=".8" opacity=".3"/>
+        <circle cx="50" cy="50" r="4" fill="#c8152a" opacity=".8"/>
+        <line x1="50" y1="8"  x2="50" y2="92" stroke="#c8152a" stroke-width=".8" opacity=".3"/>
+        <line x1="8"  y1="50" x2="92" y2="50" stroke="#c8152a" stroke-width=".8" opacity=".3"/>
+        <line x1="20" y1="20" x2="80" y2="80" stroke="#c8152a" stroke-width=".6" opacity=".2"/>
+        <line x1="80" y1="20" x2="20" y2="80" stroke="#c8152a" stroke-width=".6" opacity=".2"/>
+        <polygon points="50,15 56,38 50,44 44,38" fill="#c8152a" opacity=".7"/>
+        <polygon points="85,50 62,56 56,50 62,44" fill="#c8152a" opacity=".7"/>
+        <polygon points="50,85 44,62 50,56 56,62" fill="#c8152a" opacity=".7"/>
+        <polygon points="15,50 38,44 44,50 38,56" fill="#c8152a" opacity=".7"/>
+      </svg>
+    </div>
+    <div class="title-kanji">知識の戦い</div>
+    <div class="title-sub" style="margin-top:.5rem">Chishiki no Tatakai</div>
+    <p class="text-muted mt-2" style="font-size:.9rem; max-width:340px; margin:1rem auto 0">
+      Adu kecepatan &amp; pengetahuan secara real-time. Siapa yang tercepat menjawab benar?
+    </p>
+  </div>
+
+  <!-- Auth Section (shown when not logged in) -->
+  <div id="home-auth-section" class="home-roles anim-fade-2">
+    <div class="role-card" onclick="showScreen('screen-login')">
+      <span class="role-icon">🔓</span>
+      <div class="role-title">Masuk</div>
+      <div class="role-desc">Gunakan akun Anda</div>
+    </div>
+    <div class="role-card" onclick="showScreen('screen-register')">
+      <span class="role-icon">✏️</span>
+      <div class="role-title">Daftar</div>
+      <div class="role-desc">Buat akun baru</div>
+    </div>
+  </div>
+
+  <!-- Game Section (shown when logged in) -->
+  <div id="home-game-section" class="home-roles anim-fade-2">
+    <div class="role-card" onclick="goToHostSetup()">
+      <span class="role-icon">👑</span>
+      <div class="role-title">Buat Room</div>
+      <div class="role-desc">Jadilah Host &amp; undang teman</div>
+    </div>
+    <div class="role-card" onclick="showScreen('screen-player-join')">
+      <span class="role-icon">⚔️</span>
+      <div class="role-title">Masuk Room</div>
+      <div class="role-desc">Bergabung sebagai Peserta</div>
+    </div>
+  </div>
+
+  <!-- User Info (shown when logged in) -->
+  <div id="home-user-info" style="text-align:center; animation:fadeIn .4s ease both; margin-top:1rem">
+    <p style="font-size:.9rem; color:var(--muted); margin-bottom:.5rem">Logged in sebagai</p>
+    <p style="font-size:1.2rem; font-weight:700; color:var(--white)" id="home-username"></p>
+    <div style="display:flex; gap:.5rem; justify-content:center; margin-top:.75rem">
+      <button class="btn btn-ghost" style="font-size:.75rem; padding:.4rem 1rem" onclick="showScreen('screen-profile')">
+        👤 Profil
+      </button>
+      <button class="btn btn-ghost" style="font-size:.75rem; padding:.4rem 1rem" onclick="handleLogout()">
+        🚪 Logout
+      </button>
+    </div>
+  </div>
+
+  <p class="text-muted anim-fade-3" style="font-size:.75rem; text-align:center">
+    15 soal • +10 benar • −5 salah • Real-time
+  </p>
+</div>

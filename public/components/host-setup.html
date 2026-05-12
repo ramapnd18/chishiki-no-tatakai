@@ -1,0 +1,43 @@
+<div id="screen-host-setup" class="screen">
+  <div class="host-setup-inner">
+
+    <div class="flex items-center justify-between" style="margin-bottom:1.5rem">
+      <div>
+        <div class="title-sub">Lobby Host</div>
+        <h1 style="font-size:1.5rem; font-weight:900; color:var(--white)">知識の戦い</h1>
+      </div>
+      <button class="btn btn-ghost" onclick="leaveAndGoHome()" style="font-size:.8rem">← Keluar</button>
+    </div>
+
+    <div class="room-code-display card anim-fade">
+      <div class="label">Kode Room — Bagikan kepada peserta</div>
+      <div class="code" id="host-room-code">——</div>
+      <div class="hint">Peserta masuk dengan kode ini</div>
+      <button class="btn btn-ghost mt-2" onclick="copyRoomCode()" style="font-size:.8rem; padding:.4rem 1rem">
+        📋 Salin Kode
+      </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card anim-fade-2">
+      <div class="flex items-center justify-between" style="margin-bottom:.75rem">
+        <div class="card-header" style="margin:0">Peserta Bergabung</div>
+        <span class="badge badge-blue" id="host-player-count">0 Peserta</span>
+      </div>
+      <ul class="player-list" id="host-player-list">
+        <li style="justify-content:center; color:var(--muted); font-size:.85rem; border:none; background:none">
+          Menunggu peserta bergabung…
+        </li>
+      </ul>
+    </div>
+
+    <div class="divider"></div>
+
+    <button class="btn btn-red btn-full btn-lg anim-fade-3"
+            id="btn-start-game" disabled onclick="sendStartGame()">
+      <span>⚔️</span> Mulai Permainan
+    </button>
+    <p class="text-muted text-center mt-1" style="font-size:.78rem">Minimal 1 peserta untuk memulai</p>
+  </div>
+</div>
