@@ -194,6 +194,11 @@ function broadcastCurrentQuestion(room: Room) {
   }
 
   const q = game.questions[game.currentIndex];
+  if (!q) {
+    endGame(room);
+    return;
+  }
+
   game.answeredPlayerIds = new Set();
   game.questionDone = false;
 
@@ -240,6 +245,8 @@ export function handleAnswer(
   game.answeredPlayerIds.add(playerId);
 
   const currentQ = game.questions[game.currentIndex];
+  if (!currentQ) return { error: "Soal tidak ditemukan." };
+
   const correct = answerIndex === currentQ.correctIndex;
 
   if (correct) {
@@ -324,6 +331,8 @@ export function skipQuestion(
   if (game.questionDone) return { error: "Soal sudah selesai." };
 
   const currentQ = game.questions[game.currentIndex];
+  if (!currentQ) return { error: "Soal tidak ditemukan." };
+
   game.questionDone = true;
 
   broadcast(room, {
